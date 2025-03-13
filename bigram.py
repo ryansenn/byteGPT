@@ -1,25 +1,50 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import numpy as np
+import random
 
-class Bigram(nn.Module):
-    def __init__(self, vocab_size):
-        super().__init__()
-        self.embedding = nn.Embedding(vocab_size, vocab_size)
+# Input data and token set
+with open('data.txt', 'r') as f:
+    data = f.read()
 
-    def forward(self, idx, targets=None):
-        logits = self.embedding(idx)
+tokens = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,?!'’-+()sz:\"\n"
 
-        if targets is None:
-            return logits, None
+# Create character-to-index and index-to-character mappings
+char_to_idx = {ch: i for i, ch in enumerate(tokens)}
+idx_to_char = {i: ch for i, ch in enumerate(tokens)}
 
-        loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1))
-        return logits, loss
 
-    def generate(self, idx, max_tokens):
-        for _ in range(max_tokens):
-            logits, _ = self(idx)
-            probs = F.softmax(logits[:, -1, :], dim=-1)
-            next_idx = torch.multinomial(probs, 1)
-            idx = torch.cat((idx, next_idx), dim=1)
-        return idx
+# Build bigram probability matrix
+def build_bigram_probabilities(text):
+    n_tokens = len(tokens)
+    bigram_count = np.ones((n_tokens, n_tokens))
+
+    for i in range(len(text) - 1):
+        bigram_count[char_to_idx[text[i]]][char_to_idx[text[i + 1]]] += 1
+
+    # Convert counts to probabilities
+    row_sums = bigram_count.sum(axis=1, keepdims=True)
+    return bigram_count / row_sums
+
+
+bigram_prob = build_bigram_probabilities(data)
+
+
+# Sample the next token based on probabilities
+def next_token(prev):
+    prev_index = char_to_idx[prev]
+    return idx_to_char[np.random.choice(len(tokens), p=bigram_prob[prev_index])]
+
+
+# Generate text
+def generate(start='h', length=100):
+    result = [start]
+    curr = start
+
+    for _ in range(length - 1):
+        curr = next_token(curr)
+        result.append(curr)
+
+    return ''.join(result)
+
+
+# Generate and print text
+print(generate())
