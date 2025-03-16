@@ -10,7 +10,7 @@ class NGram(nn.Module):
         return self.prob(x)
 
     def generate(self, x, size):
-        result = [x]
+        result = x
 
         for _ in range(size):
             logits = self.forward(x)
@@ -18,15 +18,9 @@ class NGram(nn.Module):
             prob = torch.softmax(logits, dim=-1)
             x = torch.multinomial(prob, num_samples=1) # B x 1
 
-            result.append(x)
+            result = torch.cat((result,x), dim=1)
 
-        return torch.cat(result)
+        return result
 
-
-
-model = NGram(10)
-x = torch.tensor([[1]])
-res = model.generate(x,20)
-print(res)
 
 
