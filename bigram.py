@@ -1,11 +1,11 @@
 import numpy as np
 import random
 
-# Input data and token set
-with open('data.txt', 'r') as f:
-    data = f.read()
 
-tokens = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,?!'’-+()sz:\"\n"
+with open("data.txt", "r") as file:
+    data = file.read().replace("\n", "")
+
+tokens = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,?!'’-+():\"\\“\\”\n"
 
 # Create character-to-index and index-to-character mappings
 char_to_idx = {ch: i for i, ch in enumerate(tokens)}
