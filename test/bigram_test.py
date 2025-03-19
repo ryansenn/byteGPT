@@ -1,5 +1,5 @@
 from ngram.bigram import Bigram
-from ngram.vocab import *
+from data.vocab import *
 import torch
 
 with open('../data/data_sf.txt', 'r', encoding='utf-8') as f:

@@ -1,12 +1,22 @@
 from ngram.NGram import NGram
-from ngram.vocab import *
+from data.vocab import *
 import torch
+import nltk
+from nltk.corpus import treebank
+
+
+nltk.download('treebank')
+text = " ".join([" ".join(sent) for sent in treebank.sents()])
+
 
 with open('../data/basic_data.txt', 'r', encoding='utf-8') as f:
-    text = f.read()
+    text += f.read()
 
 with open('../data/data_sf.txt', 'r', encoding='utf-8') as f:
     text += f.read()
+
+
+print(f"Total number of characters: {len(text)}")
 
 train_data = torch.tensor(encode(text), dtype=torch.long)
 
@@ -16,13 +26,13 @@ def get_batch(batch_size):
     y = torch.stack([train_data[i+block_size:i+block_size+1] for i in ix])
     return x, y
 
-block_size = 64
+block_size = 16
 
 model = NGram(block_size,len(tokens))
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
 
-batch_size = 32
+batch_size = 64
 for steps in range(10000):
     xb, yb = get_batch(batch_size)
     logits, loss = model(xb, yb)
@@ -32,6 +42,6 @@ for steps in range(10000):
 
 print(loss.item())
 
-x = torch.tensor([encode("hello my name is Ryan and today I am testing this model, let's see what comes after this\n")])
+x = torch.tensor([encode("hello my name is Ryan and today I am testing this model, ")])
 res = model.generate(x,200)
 print(decode(res[0].tolist()))
