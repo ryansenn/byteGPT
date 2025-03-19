@@ -2,7 +2,7 @@ import numpy as np
 import random
 
 
-with open("data.txt", "r") as file:
+with open("../data/data_sf.txt", "r") as file:
     data = file.read().replace("\n", "")
 
 tokens = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,?!'’-+():\"\\“\\”\n"
