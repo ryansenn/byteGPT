@@ -6,8 +6,18 @@ class NGram(nn.Module):
         super().__init__()
         self.prob = nn.Embedding(vocab_size, vocab_size)
 
-    def forward(self, x):
-        return self.prob(x)
+    def forward(self, x, targets=None):
+        logits = self.prob(x)  # (B,T,C)
+
+        if targets is None:
+            return logits
+        else:
+            B, T, C = logits.shape
+            logits = logits.view(B * T, C)
+            targets = targets.view(B * T)
+            loss = nn.functional.cross_entropy(logits, targets)
+
+        return logits, loss
 
     def generate(self, x, size):
         result = x
