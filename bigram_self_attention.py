@@ -25,6 +25,7 @@ x = torch.randn(B, T, C)
 head_size = 16
 key = nn.Linear(C, head_size, bias=False)
 query = nn.Linear(C, head_size, bias=False)
+value = nn.Linear(C, head_size, bias=False)
 
 k = key(x) # b x t x head_size
 q = query(x) # b x t x head_size
@@ -33,7 +34,9 @@ wei = q @ k.transpose(-2, -1) # (b,t,16) @ (b,16,t) = (b, t, t)
 tril = torch.tril(torch.ones(T, T))
 wei = wei.masked_fill(tril == 0, float('-inf'))
 wei = nn.functional.softmax(wei, dim=-1)
-out = wei @ x
+
+v = value(x)
+out = wei @ v
 
 print(out.shape)
 
