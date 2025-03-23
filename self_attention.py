@@ -9,15 +9,15 @@ class Head(nn.Module):
         self.value = nn.Linear(n_embd, head_size, bias=False)
         self.tril = torch.tril(torch.ones(block_size, block_size))
 
-    def __format__(self, x):
+    def forward(self, x):
         B, T, C = x.shape
 
-        q = self.query(x)
-        k = self.key(x)
+        q = self.query(x) # B, T, head_size
+        k = self.key(x) # B, T, head_size
 
         wei = q @ k.transpose(-2,-1)
-        wei = wei.masked_fill(self.tril == 0, float='inf')
-        wei = nn.functional.softmax(wei=-1)
+        wei = wei.masked_fill(self.tril == 0, float('-inf'))
+        wei = nn.functional.softmax(wei, dim=-1)
 
         v = self.value(x)
 
