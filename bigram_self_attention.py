@@ -5,6 +5,7 @@ from self_attention import Head
 
 class Bigram(nn.Module):
     def __init__(self, vocab_size, n_embed=32, block_size=8):
+        self.block_size = block_size
         self.token_embedding_table = nn.Embedding(vocab_size, n_embed)
         self.position_embedding_table = nn.Embedding(block_size, n_embed)
         self.sa_head = Head(block_size, n_embed, n_embed)
@@ -29,6 +30,21 @@ class Bigram(nn.Module):
             loss = nn.functional.cross_entropy(logits, targets)
 
         return logits, loss
+
+    def generate(self, idx, size):
+
+        for _ in range(size):
+            idx_cropped = idx[:, -self.block_size]
+            logits, loss = self.forward(idx_cropped)
+
+            logits = logits[:,-1,:] # only last prediction
+            probs = nn.functional.softmax(logits, dim=-1)
+            next_x = torch.multinomial(probs, num_samples=1)
+
+            idx = torch.cat((idx, next_x), dim=-1)
+
+        return idx
+
 
 
 
